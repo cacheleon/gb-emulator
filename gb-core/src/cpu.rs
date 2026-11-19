@@ -1,3 +1,33 @@
+use crate::utils::*;
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum Regs {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    H,
+    L,
+}
+
+#[derive(Clone, Copy)]
+pub enum Regs16 {
+    AF,
+    BC,
+    DE,
+    HL,
+    SP,
+}
+
+pub enum Flags {
+    Z,
+    N,
+    H,
+    C,
+}
+
 #[derive(Debug)]
 pub struct Cpu {
     pc: u16,
@@ -25,6 +55,69 @@ impl Cpu {
             f: 0x00,
             h: 0x00,
             l: 0x00,
+        }
+    }
+
+    pub fn get_r8(&self, r: Regs) -> u8 {
+        match r {
+            Regs::A => self.a,
+            Regs::B => self.b,
+            Regs::C => self.c,
+            Regs::D => self.d,
+            Regs::E => self.e,
+            Regs::F => self.f,
+            Regs::H => self.h,
+            Regs::L => self.l,
+        }
+    }
+
+    pub fn set_r8(&mut self, r: Regs, value: u8) {
+        match r {
+            Regs::A => self.a = value,
+            Regs::B => self.b = value,
+            Regs::C => self.c = value,
+            Regs::D => self.d = value,
+            Regs::E => self.e = value,
+            Regs::F => self.f = value & 0xF0, // lower 4 bits of f are always 0
+            Regs::H => self.h = value,
+            Regs::L => self.l = value,
+        }
+    }
+
+    pub fn get_r16(&self, r: Regs16) -> u16 {
+        match r {
+            Regs16::AF => merge_bytes(self.a, self.f),
+            Regs16::BC => merge_bytes(self.b, self.c),
+            Regs16::DE => merge_bytes(self.d, self.e),
+            Regs16::HL => merge_bytes(self.h, self.l),
+            Regs16::SP => self.sp,
+        }
+    }
+
+    pub fn set_r16(&mut self, r: Regs16, value: u16) {
+        let high = value.high_byte();
+        let low = value.low_byte();
+
+        match r {
+            Regs16::AF => {
+                self.set_r8(Regs::A, high);
+                self.set_r8(Regs::F, low);
+            }
+            Regs16::BC => {
+                self.set_r8(Regs::B, high);
+                self.set_r8(Regs::C, low);
+            }
+            Regs16::DE => {
+                self.set_r8(Regs::D, high);
+                self.set_r8(Regs::E, low);
+            }
+            Regs16::HL => {
+                self.set_r8(Regs::H, high);
+                self.set_r8(Regs::L, low);
+            }
+            Regs16::SP => {
+                self.sp = value;
+            }
         }
     }
 }
