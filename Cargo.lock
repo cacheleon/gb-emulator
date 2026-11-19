@@ -3,5 +3,12 @@
 version = 4
 
 [[package]]
-name = "gb-emulator"
+name = "desktop"
+version = "0.1.0"
+dependencies = [
+ "gb-core",
+]
+
+[[package]]
+name = "gb-core"
 version = "0.1.0"
