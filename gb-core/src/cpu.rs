@@ -21,11 +21,23 @@ pub enum Regs16 {
     SP,
 }
 
+#[derive(Clone, Copy)]
 pub enum Flags {
     Z,
     N,
     H,
     C,
+}
+
+impl Flags {
+    const fn mask(self) -> u8 {
+        match self {
+            Flags::Z => 0x80,
+            Flags::N => 0x40,
+            Flags::H => 0x20,
+            Flags::C => 0x10,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -118,6 +130,18 @@ impl Cpu {
             Regs16::SP => {
                 self.sp = value;
             }
+        }
+    }
+
+    pub fn get_flag(&self, flag: Flags) -> bool {
+        self.f & flag.mask() != 0
+    }
+
+    pub fn set_flag(&mut self, flag: Flags, value: bool) {
+        if value {
+            self.f |= flag.mask();
+        } else {
+            self.f &= !flag.mask();
         }
     }
 }
